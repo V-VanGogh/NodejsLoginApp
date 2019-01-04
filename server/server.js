@@ -14,6 +14,7 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyparser.json());
 
+
 // POST /users
 app.post('/users', (req,res) => {
   var body = _.pick(req.body, ['email','password']);
@@ -30,7 +31,20 @@ app.post('/users', (req,res) => {
   });
 });
 
+//Make a private route
+// Get /users/me
+app.get('/users/me', (req,res) => {
+  var token = req.header('x-auth');
 
+  User.findByToken(token).then((user) => {
+    if(!user){
+      return Promise.reject();
+    }
+    res.send(user);
+  }).catch((e) => {
+    res.status(401).send();
+  });
+});
 
 
 
