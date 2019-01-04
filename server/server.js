@@ -1,12 +1,17 @@
+require('./config/config');
+
 //library imports
 const express = require('express');
 const bodyparser = require('body-parser');
 const _ = require("underscore");
+const {ObjectID} = require('mongodb');
+
 
 
 //local imports
 var {mongoose} = require('./db/mongoose');
 var {User}= require('./models/user');
+var {authenticate} = require('./middleware/authenticate');
 
 
 var app = express();
@@ -33,41 +38,13 @@ app.post('/users', (req,res) => {
 
 //Make a private route
 // Get /users/me
-app.get('/users/me', (req,res) => {
-  var token = req.header('x-auth');
 
-  User.findByToken(token).then((user) => {
-    if(!user){
-      return Promise.reject();
-    }
-    res.send(user);
-  }).catch((e) => {
-    res.status(401).send();
-  });
+app.get('/users/me',authenticate, (req,res) => {
+  res.send(req.user);
 });
 
 
 
-//
-// app.post('/todos', (req,res) => {
-//   var todo = new Todo({
-//     text: req.body.text
-//   });
-//
-//   todo.save().then((doc) => {
-//     res.send(doc);
-//   }, (e) => {
-//     res.status(400).send(e);
-//   });
-// });
-//
-// app.get('/todos', (req,res) => {
-//   Todo.find().then((todos) => {
-//     res.send({todos});
-//   }, (e) => {
-//     res.status(400).send(e);
-//   });
-// })
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
